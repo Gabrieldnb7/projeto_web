@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulação Consórcios S.A</title>
+    <link rel="shortcut icon" href="favicon.ico"  type="image/x-icon" >
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+<body>
+    <div class="row">
+        <div style="display: flex; justify-content: center; justify-content: space-between;" class="mt-5 mb-5 me-5">
+          <div class="mx-3"><img src="52x52.jpg" alt="logo"></div>
+          <h1>Gerador de tabela Online</h1>
+          <div class="mx-5 mb-2 mt-2"><button id="btnAdicionar" class="btn btn-success">+Adicionar</button></div>
+        </div>
+    <div>
+      <table class="table table-hover table-bordered mx-auto p-5" style="width: 1000px;">
+          <thead>
+              <tr>
+                  <th>Código do vendedor</th>
+                  <th>Nome do vendedor</th>
+                  <th>Cargo</th>
+                  <th>Código da venda</th>
+                  <th>Valor da venda</th>
+                  <th>Ações</th>
+              </tr>
+          </thead>
+          <tbody id="tabela" class="table-group-divider">
+          </tbody>
+      </table>
+      <div id="modalAdicionar" class="modal">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Adicionar</h5>
+                <button type="button" id="btnAdicionarClose" class="btn-close"></button>
+              </div>
+              <div class="modal-body">
+                  <form id="formularioCreate">
+                  <div>
+                      <label for="codigoVendedorCreate" class="form-label">Código do vendedor</label>
+                      <input type="number" class="form-control" id="codigoVendedorCreate">
+                  </div>
+                  <div class="mb-1">
+                    <label for="nomeCreate" class="form-label">Nome do vendedor</label>
+                    <input type="text" class="form-control" id="nomeCreate">
+                  </div>
+                  <div class="mb-1">
+                    <label for="cargoCreate" class="form-label">Cargo</label>
+                    <input type="text" class="form-control" id="cargoCreate">
+                  </div>
+                  <div class="mb-1">
+                    <label for="codVendaCreate" class="form-label">Código da venda</label>
+                    <input type="number" class="form-control" id="codVendaCreate">
+                  </div>
+                  <div class="mb-2">
+                    <label for="valorCreate" class="form-label">Valor da venda</label>
+                    <input type="number" class="form-control" id="valorCreate">
+                  </div>
+                      <div class="text-end">
+                        <button id="btnAdicionarSalvar" type="submit" class="btn btn-primary">Salvar</button>
+                      </div>
+                  </form>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+
+      <div  id="modalEditar" class="modal">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Editar</h5>
+              <button type="button" id="btnEditarClose" class="btn-close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formUpdate">
+                <div class="mb-1">
+                    <label for="codigoVendedorUpdate" class="form-label">Código do vendedor</label>
+                    <input type="number" class="form-control" id="codigoVendedorUpdate">
+                </div>
+                <div class="mb-1">
+                  <label for="nomeUpdate" class="form-label">Nome do vendedor</label>
+                  <input type="text" class="form-control" id="nomeUpdate">
+                </div>
+                <div class="mb-1">
+                  <label for="cargoUpdate" class="form-label">Cargo</label>
+                  <input type="text" class="form-control" id="cargoUpdate">
+                </div>
+                <div class="mb-1">
+                  <label for="codVendaUpdate" class="form-label">Código da venda</label>
+                  <input type="number" class="form-control" id="codVendaUpdate">
+                </div>
+                <div class="mb-2">
+                  <label for="valorUpdate" class="form-label">Valor da venda</label>
+                  <input type="number" class="form-control" id="valorUpdate">
+                </div>
+                    <div class="text-end">
+                      <button id="btnEditarSalvar" type="submit" class="btn btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="overlay" style="position: fixed; height: 100%; width: 100%; top: 0; left:0; background-color: rgb(0,0,0,0.5); display: none; ">
+      </div>
+
+    <script>
+    let vendedor = []
+    const overlay = document.getElementById('overlay')
+    const formularioCreate = document.getElementById('formularioCreate')
+    const formUpdate = document.getElementById('formUpdate')
+
+    const modalAdicionar = document.getElementById('modalAdicionar')
+    const btnAdicionar = document.getElementById('btnAdicionar')
+    const btnAdicionarClose = document.getElementById('btnAdicionarClose')
+    const btnAdicionarSalvar = document.getElementById('btnAdicionarSalvar')
+
+    const modalEditar = document.getElementById('modalEditar')
+    const btnEditarClose = document.getElementById('btnEditarClose')
+    const btnEditarSalvar = document.getElementById('btnEditarSalvar')
+
+    function toogleModal(modal){
+      const isAparente = modal.style.display === 'block'
+
+      modal.style.display = isAparente ? 'none' : 'block'
+      overlay.style.display = isAparente ? 'none' : 'block'
+    }
+
+    function adicionarVendedor(event) {
+      event.preventDefault()
+
+      let codigoVendedor = document.getElementById('codigoVendedorCreate').value
+      let nome = document.getElementById('nomeCreate').value
+      let cargo = document.getElementById('cargoCreate').value
+      let codigoVenda = document.getElementById('codVendaCreate').value
+      let valorVenda = document.getElementById('valorCreate').value
+
+      const novoVendedor = {codigoVendedor,nome,cargo,codigoVenda,valorVenda} 
+      vendedor.push(novoVendedor);
+      renderizarTabela();
+    }
+
+    function editarVendedor (index) {
+      const vendedores = vendedor[index];
+      toogleModal(modalEditar)
+
+      document.getElementById('codigoVendedorUpdate').value = vendedores.codigoVendedor;
+      document.getElementById('nomeUpdate').value = vendedores.nome;
+      document.getElementById('cargoUpdate').value = vendedores.cargo;
+      document.getElementById('codVendaUpdate').value = vendedores.codigoVenda;
+      document.getElementById('valorUpdate').value = vendedores.valorVenda;
+
+      formUpdate.addEventListener('submit', function (event){
+        event.preventDefault();
+        const novoVendedor = {
+          codigoVendedor: document.getElementById('codigoVendedorUpdate').value,
+          nome: document.getElementById('nomeUpdate').value,
+          cargo: document.getElementById('cargoUpdate').value,
+          codigoVenda: document.getElementById('codVendaUpdate').value,
+          valorVenda: document.getElementById('valorUpdate').value
+        };
+        vendedor[index] = novoVendedor;
+        renderizarTabela()
+      })
+    }
+
+    function renderizarTabela(){
+      const tabela = document.getElementById('tabela')
+      tabela.innerHTML = ''
+      vendedor.forEach((vendedor, index) => {
+        tabela.innerHTML += `
+        <tr>
+          <td>${vendedor.codigoVendedor}</td>
+          <td>${vendedor.nome}</td>
+          <td>${vendedor.cargo}</td>
+          <td>${vendedor.codigoVenda}</td>
+          <td>${vendedor.valorVenda}</td>
+          <td>
+            <button class="btn btn-primary" onclick="editarVendedor(${index})">Editar</button>
+            <button class="btn btn-danger" onclick="excluirVendedor(${index})">Excluir</button>
+          </td>
+        </tr>
+          `
+      })
+    }
+    function excluirVendedor(index) {
+      const excluir = confirm('Deseja excluir esse vendedor?')
+
+      if(excluir) {
+        vendedor.splice(index, 1);
+        renderizarTabela();
+      }
+    }
+
+    
+  
+  // function buscarVendedores() {
+  //   fetch('http://localhost:5000/api')
+  //     .then(response => {
+  //       if (!response.ok) {
+  //         throw new Error('Erro ao buscar vendedores');
+  //       }
+  //       return response.json();
+  //     })
+  //     .then(dados => {
+  //       vendedor = dados;
+  //       renderizarTabela();
+  //     })
+  //     .catch(error => {
+  //       console.error('Erro:', error);
+  //     });
+  // }
+
+  function buscarVendedores(){
+    fetch('http://localhost:5000/api')
+      .then(response => response.json())
+      .then(dados => {
+        vendedor = dados
+        renderizarTabela()
+      })
+  }
+
+    btnAdicionar.addEventListener('click', () => toogleModal(modalAdicionar))
+    btnAdicionarClose.addEventListener('click', () => toogleModal(modalAdicionar))
+    btnAdicionarSalvar.addEventListener('click', () => toogleModal(modalAdicionar))
+    
+    formularioCreate.addEventListener('submit', adicionarVendedor)
+    
+    btnEditarSalvar.addEventListener('click', () => toogleModal(modalEditar))
+    btnEditarClose.addEventListener('click', () => toogleModal(modalEditar))
+
+    document.addEventListener('DOMContentLoaded', buscarVendedores)
+    </script>
+</body>
+</html>
