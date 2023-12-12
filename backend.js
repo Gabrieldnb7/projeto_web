@@ -17,29 +17,30 @@ let vendedor = []
 
 const servidorWEB = http.createServer(function(req,res){
     res = cors(req, res)
-    // const banco = new conexao.Database('banco.sqlite3', (err) => {
-    //     if (err) {
-    //         console.error('Erro ao conectar com o banco de dados.', err.message);
-    //     }
-    //     else{
-    //         console.log('Conexão com o banco de dados bem sucedida.')
-    //     }
-    // })
+    const banco = new conexao.Database('banco.sqlite3', (err) => {
+        if (err) {
+            console.error('Erro ao conectar com o banco de dados.', err.message);
+        }
+        else{
+            console.log('Conexão com o banco de dados bem sucedida.')
+        }
+    })
 
     res.setHeader('Content-Type', 'application/json')
 
     if (req.url === '/api'){
-        // banco.all('SELECT * FROM vendas', (err, rows) => {
-        // if (err) {
-        //     console.error('Erro ao selecionar usuários:', err.message);
-        // } else {
-        //     rows.forEach((row) => {
-        //     parte = (`codVenda:${row.codVenda}`);
-        //     });
-        // }
-        // });
-        res.statusCode = 200;
-        res.end(JSON.stringify(vendedor))
+        banco.all('SELECT * FROM vendas', (err, rows) => {
+        pedaco = ''
+        if (err) {
+            res.statusCode = 500;
+            console.error('Erro ao selecionar usuários:', err.message);
+        } else {
+            res.statusCode = 200
+            res.setHeader('Content-Type', 'application/json')
+            vendedor = JSON.stringify(rows)
+            res.end(vendedor)
+        }
+        });
     }
     else {
         res.statusCode = 404;
